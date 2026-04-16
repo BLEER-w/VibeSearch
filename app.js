@@ -8,7 +8,7 @@ let spotifyToken = null;
 let currentAudio = null;
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
-/* SPOTIFY */
+/* ================= SPOTIFY ================= */
 async function getSpotifyToken() {
     const res = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
@@ -23,6 +23,7 @@ async function getSpotifyToken() {
     spotifyToken = data.access_token;
 }
 
+/* ================= HELPERS ================= */
 function saveFavorites() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
 }
@@ -52,9 +53,10 @@ function getArtistImage(a) {
 
     if (img && img.trim()) return img;
 
-    return `https://placehold.co/300x300/1a003d/ffffff?text=${encodeURIComponent(a.name)}`;
+    return null;
 }
 
+/* ================= YOUTUBE ================= */
 async function getYouTubeVideoId(artist, song) {
     const query = encodeURIComponent(`${artist} ${song} official music video`);
 
@@ -66,17 +68,19 @@ async function getYouTubeVideoId(artist, song) {
     return data.items?.[0]?.id?.videoId || null;
 }
 
+/* ================= SPOTIFY ================= */
 function openSpotify(name) {
     window.open(`https://open.spotify.com/search/${encodeURIComponent(name)}`, "_blank");
 }
 
-function toggleFavorite(name, image) {
+/* ================= FAVORITES ================= */
+function toggleFavorite(name) {
     const exists = favorites.find(f => f.name === name);
 
     if (exists) {
         favorites = favorites.filter(f => f.name !== name);
     } else {
-        favorites.push({ name, image });
+        favorites.push({ name });
     }
 
     saveFavorites();
@@ -90,17 +94,14 @@ function openFavoritesPage() {
         const card = document.createElement("div");
         card.className = "artist-card";
 
-        card.innerHTML = `
-            <img src="${a.image}">
-            <div class="card-info"><h3>${a.name}</h3></div>
-        `;
-
+        card.innerHTML = `<div class="card-info"><h3>${a.name}</h3></div>`;
         card.onclick = () => openSpotify(a.name);
+
         results.appendChild(card);
     });
 }
 
-/* SEARCH */
+/* ================= SEARCH ================= */
 async function search() {
     const input = document.getElementById("artist").value;
     const results = document.getElementById("results");
@@ -117,23 +118,22 @@ async function search() {
 
     for (const a of artists.slice(0, 12)) {
 
-        const img = getArtistImage(a);
         const track = await getTopTrack(a.name);
 
         const card = document.createElement("div");
         card.className = "artist-card";
 
         card.innerHTML = `
-            <img src="${img}">
             <div class="card-info">
                 <h3>${a.name}</h3>
 
                 ${track ? `
-                    <p class="track-name">🎵 ${track.name}</p>
-                    <button class="video-btn">🎬 Watch Video</button>
+                    <p class="track-name">${track.name}</p>
+                    <button class="video-btn">Watch Video</button>
                     <div class="video-container" style="display:none;"></div>
                 ` : ""}
             </div>
+
             <div class="card-actions">
                 <button class="spotify-btn">Spotify</button>
                 <button class="fav-btn">${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}</button>
@@ -141,6 +141,7 @@ async function search() {
             </div>
         `;
 
+        /* VIDEO */
         const videoBtn = card.querySelector(".video-btn");
         const container = card.querySelector(".video-container");
 
@@ -168,6 +169,7 @@ async function search() {
             };
         }
 
+        /* BUTTONS */
         card.querySelector(".spotify-btn").onclick = (e) => {
             e.stopPropagation();
             openSpotify(a.name);
@@ -175,10 +177,11 @@ async function search() {
 
         card.querySelector(".fav-btn").onclick = (e) => {
             e.stopPropagation();
-            toggleFavorite(a.name, img);
+            toggleFavorite(a.name);
             search();
         };
 
+        /* AUDIO */
         if (track?.preview) {
             const playBtn = card.querySelector(".play-btn");
 
