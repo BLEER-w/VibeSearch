@@ -12,7 +12,7 @@ function renderFavoritesBadge() {
 }
 
 /* =====================
-   IMAGE FIX (IMPORTANT)
+   IMAGE FIX
 ===================== */
 function getArtistImage(a) {
     const img =
@@ -54,15 +54,16 @@ function openFavoritesPage() {
 
     results.innerHTML = "";
 
-    favorites.forEach(name => {
+    favorites.forEach(artist => {
         const card = document.createElement("div");
         card.className = "artist-card";
+
         card.innerHTML = `
-            <img src="https://placehold.co/300x300/1a003d/fff?text=${name}">
-            <div class="card-info"><h3>${name}</h3></div>
+            <img src="${artist.image}">
+            <div class="card-info"><h3>${artist.name}</h3></div>
         `;
 
-        card.onclick = () => openSpotify(name);
+        card.onclick = () => openSpotify(artist.name);
         results.appendChild(card);
     });
 }
@@ -70,12 +71,15 @@ function openFavoritesPage() {
 /* =====================
    FAVORITE TOGGLE
 ===================== */
-function toggleFavorite(name) {
-    if (favorites.includes(name)) {
-        favorites = favorites.filter(a => a !== name);
+function toggleFavorite(name, image) {
+    const existing = favorites.find(a => a.name === name);
+
+    if (existing) {
+        favorites = favorites.filter(a => a.name !== name);
     } else {
-        favorites.push(name);
+        favorites.push({ name, image });
     }
+
     saveFavorites();
     renderFavoritesBadge();
 }
@@ -112,7 +116,7 @@ function search() {
                     <div class="card-actions">
                         <button class="spotify-btn">Spotify</button>
                         <button class="fav-btn">
-                            ${favorites.includes(a.name) ? "❤️" : "🤍"}
+                            ${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}
                         </button>
                     </div>
                 `;
@@ -136,7 +140,7 @@ function search() {
 
                 card.querySelector(".fav-btn").onclick = (e) => {
                     e.stopPropagation();
-                    toggleFavorite(a.name);
+                    toggleFavorite(a.name, getArtistImage(a));
                     search();
                 };
 
