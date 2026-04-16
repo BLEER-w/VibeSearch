@@ -161,7 +161,35 @@ async function search() {
         </div>
     `;
 
-    // open spotify
+    if (track?.preview) {
+
+    const videoBtn = card.querySelector(".video-btn");
+    const container = card.querySelector(".video-container");
+
+    videoBtn.onclick = (e) => {
+        e.stopPropagation();
+
+        // toggle
+        if (container.style.display === "block") {
+            container.innerHTML = "";
+            container.style.display = "none";
+            return;
+        }
+
+        const url = getYouTubeEmbedUrl(a.name, track.name);
+
+        container.innerHTML = `
+            <iframe width="100%" height="200"
+                src="${url}"
+                frameborder="0"
+                allow="autoplay; encrypted-media"
+                allowfullscreen>
+            </iframe>
+        `;
+
+        container.style.display = "block";
+    };
+}
     card.querySelector(".spotify-btn").onclick = (e) => {
         e.stopPropagation();
         openSpotify(a.name);
