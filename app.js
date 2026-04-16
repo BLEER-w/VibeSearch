@@ -146,7 +146,11 @@ async function search() {
         <div class="card-info">
             <h3>${a.name}</h3>
             <p>${Math.round(a.match * 100)}%</p>
-            ${track ? `<p class="track-name">🎵 ${track.name}</p>` : ""}
+            ${track ? `
+    <p class="track-name">🎵 ${track.name}</p>
+    <button class="video-btn">🎬 Watch Video</button>
+    <div class="video-container" style="display:none;"></div>
+` : ""}
         </div>
         <div class="card-actions">
             <button class="spotify-btn">Spotify</button>
