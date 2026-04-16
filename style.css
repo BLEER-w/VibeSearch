@@ -1,10 +1,4 @@
-
-/* smooth feed animation */
-.animate {
-    animation: fadeUp 0.4s ease;
-/* =========================
-   🌌 GALAXY BACKGROUND
-========================= */
+/* 🌌 GALAXY BACKGROUND */
 body {
     margin: 0;
     min-height: 100vh;
@@ -18,10 +12,6 @@ body {
                 #05010a;
 }
 
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-/* drifting nebula layer */
 body::before {
     content: "";
     position: fixed;
@@ -32,9 +22,6 @@ body::before {
     z-index: -2;
 }
 
-/* actions row */
-.card-actions {
-/* star field */
 body::after {
     content: "";
     position: fixed;
@@ -47,52 +34,43 @@ body::after {
 }
 
 @keyframes drift {
-    from { transform: translate(0,0) scale(1); }
     to { transform: translate(25px,-25px) scale(1.1); }
 }
 
 @keyframes starMove {
-    from { transform: translateY(0); }
     to { transform: translateY(-200px); }
 }
 
-/* =========================
-   HEADER
-========================= */
+/* HEADER */
 .header {
     text-align: center;
     padding: 20px;
 }
 
 .header h1 {
-    font-size: 2.5em;
     color: #00d4ff;
 }
 
-/* =========================
-   SEARCH
-========================= */
+/* SEARCH */
 .search-section {
     display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
     justify-content: center;
     gap: 10px;
     padding: 20px;
-    position: relative;
 }
 
-.fav-btn, .spotify-btn {
 #artist {
     width: 300px;
     padding: 12px;
     border-radius: 25px;
     border: none;
-    padding: 6px 10px;
-    border-radius: 10px;
     background: #1a003d;
     color: white;
     outline: none;
+}
+
+#artist:focus {
+    box-shadow: 0 0 10px #7c3aed;
 }
 
 button {
@@ -100,26 +78,12 @@ button {
     border-radius: 20px;
     border: none;
     cursor: pointer;
-    transition: 0.2s;
 }
 
-button:hover {
-    transform: scale(1.05);
-}
+.search-btn { background: #7c3aed; color: white; }
+.fav-btn-top { background: #ff4081; color: white; }
 
-.search-btn {
-    background: #7c3aed;
-    color: white;
-}
-
-.fav-btn-top {
-    background: #ff4081;
-    color: white;
-}
-
-/* =========================
-   RESULTS GRID
-========================= */
+/* GRID */
 #results {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -127,32 +91,26 @@ button:hover {
     padding: 20px;
 }
 
-/* =========================
-   SPOTIFY STYLE CARD
-========================= */
+/* CARD */
 .artist-card {
-    background: #120022;
+    backdrop-filter: blur(10px);
+    background: rgba(18, 0, 34, 0.6);
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 14px;
     overflow: hidden;
     cursor: pointer;
-    font-size: 0.8em;
     transition: 0.3s;
-    position: relative;
 }
 
 .artist-card:hover {
     transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 0 20px rgba(124,58,237,0.6);
 }
 
 .artist-card img {
     width: 100%;
     height: 160px;
     object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.artist-card:hover img {
-    transform: scale(1.05);
 }
 
 .card-info {
@@ -161,65 +119,24 @@ button:hover {
 
 .card-info h3 {
     color: #00d4ff;
-    margin: 0;
 }
 
-.card-info p {
-    color: #b0b0ff;
-    font-size: 0.9em;
-}
-
-/* =========================
-   CARD BUTTONS
-========================= */
 .card-actions {
     display: flex;
-    justify-content: space-between;
     padding: 10px;
 }
 
 .spotify-btn {
     background: #1DB954;
-    color: white;
-    border: none;
     flex: 1;
-    margin-right: 5px;
 }
 
 .fav-btn {
     background: #ff4081;
-    color: white;
-    border: none;
     width: 50px;
 }
 
-/* autocomplete */
-/* =========================
-   AUTOCOMPLETE
-========================= */
-#autocomplete-box {
-    position: absolute;
-    top: 60px;
-    background: #1a003d;
-    width: 300px;
-    border-radius: 10px;
-    overflow: hidden;
-    z-index: 10;
-}
-
-.auto-item {
-    padding: 10px;
-    cursor: pointer;
-    color: white;
-}
-
-.auto-item:hover {
-    background: #7c3aed;
-}
-
-/* =========================
-   MODAL
-========================= */
+/* MODAL */
 .modal {
     display: none;
     position: fixed;
@@ -231,7 +148,6 @@ button:hover {
     background: #1a003d;
     margin: 10% auto;
     padding: 20px;
-    width: 90%;
     max-width: 500px;
     border-radius: 12px;
 }
@@ -239,5 +155,4 @@ button:hover {
 .close-btn {
     float: right;
     cursor: pointer;
-    font-size: 1.5em;
 }
