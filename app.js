@@ -8,9 +8,7 @@ let spotifyToken = null;
 let currentAudio = null;
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
-/* =====================
-   SPOTIFY AUTH
-===================== */
+/* SPOTIFY */
 async function getSpotifyToken() {
     const res = await fetch("https://accounts.spotify.com/api/token", {
         method: "POST",
@@ -25,20 +23,6 @@ async function getSpotifyToken() {
     spotifyToken = data.access_token;
 }
 
-async function getSpotifyArtistImage(name) {
-    if (!spotifyToken) await getSpotifyToken();
-
-    const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist&limit=1`, {
-        headers: { "Authorization": "Bearer " + spotifyToken }
-    });
-
-    const data = await res.json();
-    return data.artists?.items?.[0]?.images?.[0]?.url || null;
-}
-
-/* =====================
-   HELPERS
-===================== */
 function saveFavorites() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
 }
@@ -66,14 +50,11 @@ function getArtistImage(a) {
         a.image?.[2]?.['#text'] ||
         a.image?.[1]?.['#text'];
 
-    if (img && img.trim() !== "") return img;
+    if (img && img.trim()) return img;
 
     return `https://placehold.co/300x300/1a003d/ffffff?text=${encodeURIComponent(a.name)}`;
 }
 
-/* =====================
-   YOUTUBE VIDEO
-===================== */
 async function getYouTubeVideoId(artist, song) {
     const query = encodeURIComponent(`${artist} ${song} official music video`);
 
@@ -82,25 +63,18 @@ async function getYouTubeVideoId(artist, song) {
     );
 
     const data = await res.json();
-
     return data.items?.[0]?.id?.videoId || null;
 }
 
-/* =====================
-   SPOTIFY LINK
-===================== */
 function openSpotify(name) {
     window.open(`https://open.spotify.com/search/${encodeURIComponent(name)}`, "_blank");
 }
 
-/* =====================
-   FAVORITES
-===================== */
 function toggleFavorite(name, image) {
-    const exists = favorites.find(a => a.name === name);
+    const exists = favorites.find(f => f.name === name);
 
     if (exists) {
-        favorites = favorites.filter(a => a.name !== name);
+        favorites = favorites.filter(f => f.name !== name);
     } else {
         favorites.push({ name, image });
     }
@@ -111,11 +85,6 @@ function toggleFavorite(name, image) {
 function openFavoritesPage() {
     const results = document.getElementById("results");
     results.innerHTML = "";
-
-    if (favorites.length === 0) {
-        results.innerHTML = "<p>No favorites yet ❤️</p>";
-        return;
-    }
 
     favorites.forEach(a => {
         const card = document.createElement("div");
@@ -131,9 +100,7 @@ function openFavoritesPage() {
     });
 }
 
-/* =====================
-   SEARCH
-===================== */
+/* SEARCH */
 async function search() {
     const input = document.getElementById("artist").value;
     const results = document.getElementById("results");
@@ -160,7 +127,6 @@ async function search() {
             <img src="${img}">
             <div class="card-info">
                 <h3>${a.name}</h3>
-                <p>${Math.round(a.match * 100)}%</p>
 
                 ${track ? `
                     <p class="track-name">🎵 ${track.name}</p>
@@ -170,16 +136,11 @@ async function search() {
             </div>
             <div class="card-actions">
                 <button class="spotify-btn">Spotify</button>
+                <button class="fav-btn">${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}</button>
                 ${track?.preview ? `<button class="play-btn">▶️</button>` : ""}
-                <button class="fav-btn">
-                    ${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}
-                </button>
             </div>
         `;
 
-        /* =====================
-           YOUTUBE BUTTON LOGIC
-        ===================== */
         const videoBtn = card.querySelector(".video-btn");
         const container = card.querySelector(".video-container");
 
@@ -187,26 +148,18 @@ async function search() {
             videoBtn.onclick = async (e) => {
                 e.stopPropagation();
 
-                if (container.style.display === "block") {
-                    container.innerHTML = "";
-                    container.style.display = "none";
-                    return;
-                }
-
-                container.innerHTML = "Loading video...";
+                container.innerHTML = "Loading...";
 
                 const videoId = await getYouTubeVideoId(a.name, track.name);
 
                 if (!videoId) {
-                    container.innerHTML = "<p>No video found</p>";
+                    container.innerHTML = "No video found";
                     return;
                 }
 
                 container.innerHTML = `
                     <iframe width="100%" height="200"
                         src="https://www.youtube.com/embed/${videoId}"
-                        frameborder="0"
-                        allow="autoplay; encrypted-media"
                         allowfullscreen>
                     </iframe>
                 `;
@@ -215,26 +168,17 @@ async function search() {
             };
         }
 
-        /* =====================
-           SPOTIFY BUTTON
-        ===================== */
         card.querySelector(".spotify-btn").onclick = (e) => {
             e.stopPropagation();
             openSpotify(a.name);
         };
 
-        /* =====================
-           FAVORITE BUTTON
-        ===================== */
         card.querySelector(".fav-btn").onclick = (e) => {
             e.stopPropagation();
             toggleFavorite(a.name, img);
             search();
         };
 
-        /* =====================
-           AUDIO PREVIEW
-        ===================== */
         if (track?.preview) {
             const playBtn = card.querySelector(".play-btn");
 
@@ -263,9 +207,7 @@ async function search() {
     }
 }
 
-/* =====================
-   INIT
-===================== */
+/* INIT */
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("artist").addEventListener("keypress", e => {
         if (e.key === "Enter") search();
