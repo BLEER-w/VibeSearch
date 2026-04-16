@@ -151,6 +151,18 @@ button {
     max-width: 500px;
     border-radius: 12px;
 }
+.play-btn {
+    background: #00d4ff;
+    color: black;
+    width: 50px;
+    margin: 0 5px;
+}
+
+.track-name {
+    font-size: 0.85em;
+    color: #b0b0ff;
+    margin-top: 5px;
+}
 
 .close-btn {
     float: right;
