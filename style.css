@@ -19,26 +19,11 @@ body::before {
     background: radial-gradient(circle at 30% 40%, rgba(124,58,237,0.25), transparent 40%),
                 radial-gradient(circle at 70% 60%, rgba(0,212,255,0.15), transparent 45%);
     animation: drift 12s ease-in-out infinite alternate;
-    z-index: -2;
-}
-
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(white 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.15;
-    animation: starMove 60s linear infinite;
     z-index: -1;
 }
 
 @keyframes drift {
     to { transform: translate(25px,-25px) scale(1.1); }
-}
-
-@keyframes starMove {
-    to { transform: translateY(-200px); }
 }
 
 /* HEADER */
@@ -130,6 +115,19 @@ button {
     background: #1DB954;
     flex: 1;
 }
+
+.play-btn {
+    background: #00d4ff;
+    color: black;
+    width: 50px;
+    margin: 0 5px;
+}
+
+.fav-btn {
+    background: #ff4081;
+    width: 50px;
+}
+
 .video-btn {
     background: #ffcc00;
     color: black;
@@ -144,9 +142,10 @@ button {
     overflow: hidden;
 }
 
-.fav-btn {
-    background: #ff4081;
-    width: 50px;
+.track-name {
+    font-size: 0.85em;
+    color: #b0b0ff;
+    margin-top: 5px;
 }
 
 /* MODAL */
@@ -163,18 +162,6 @@ button {
     padding: 20px;
     max-width: 500px;
     border-radius: 12px;
-}
-.play-btn {
-    background: #00d4ff;
-    color: black;
-    width: 50px;
-    margin: 0 5px;
-}
-
-.track-name {
-    font-size: 0.85em;
-    color: #b0b0ff;
-    margin-top: 5px;
 }
 
 .close-btn {
