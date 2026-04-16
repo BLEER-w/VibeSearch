@@ -93,13 +93,14 @@ button {
 }
 
 .card-info {
-    padding: 10px;
+    padding: 12px;
 }
 
 .card-info h3 {
     color: #00d4ff;
 }
 
+/* ACTIONS */
 .card-actions {
     display: flex;
     padding: 10px;
@@ -122,6 +123,7 @@ button {
     width: 50px;
 }
 
+/* VIDEO */
 .video-btn {
     background: #ffcc00;
     color: black;
@@ -140,25 +142,4 @@ button {
     font-size: 0.85em;
     color: #b0b0ff;
     margin-top: 5px;
-}
-
-/* MODAL */
-.modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-}
-
-.modal-content {
-    background: #1a003d;
-    margin: 10% auto;
-    padding: 20px;
-    max-width: 500px;
-    border-radius: 12px;
-}
-
-.close-btn {
-    float: right;
-    cursor: pointer;
 }
