@@ -3,16 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeSearch - Music Artist Search</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>VibeSearch</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>VibeSearch</h1>
-        <input type="text" id="artist-search" placeholder="Search for a music artist...">
-        <button id="search-button">Search</button>
+        <h1>🎵 VibeSearch</h1>
+        <p>Find artists similar to your favorites</p>
+        
+        <div class="search-box">
+            <input type="text" id="artist-input" class="search-input" placeholder="Enter artist name...">
+            <button id="search-button" class="search-button">Search</button>
+        </div>
+        
         <div id="results"></div>
     </div>
-    <script src="script.js"></script>
+    
+    <script>
+        const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
+        
+        function handleSearch() {
+            const artistName = document.getElementById('artist-input').value.trim();
+            
+            if (!artistName) {
+                alert('Please enter an artist name');
+                return;
+            }
+            
+            const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artistName)}&api_key=${API_KEY}&format=json`;
+            
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('results').innerHTML = '<p>Artist not found</p>';
+                        return;
+                    }
+                    
+                    const artists = data.similarartists.artist;
+                    displayResults(artists);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('results').innerHTML = '<p>Error fetching data</p>';
+                });
+        }
+        
+        function displayResults(artists) {
+            let html = '';
+            artists.slice(0, 12).forEach(artist => {
+                const img = artist.image[2] ? artist.image[2]['#text'] : 'https://via.placeholder.com/150';
+                html += `
+                    <div class="artist-card" onclick="search('${artist.name}')">
+                        <img src="${img}" alt="${artist.name}" style="width:100%; border-radius:5px;">
+                        <h3>${artist.name}</h3>
+                        <p>${Math.round(artist.match * 100)}% match</p>
+                    </div>
+                `;
+            });
+            document.getElementById('results').innerHTML = html;
+        }
+        
+        function search(artistName) {
+            document.getElementById('artist-input').value = artistName;
+            handleSearch();
+        }
+        
+        document.getElementById('search-button').addEventListener('click', handleSearch);
+        document.getElementById('artist-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSearch();
+        });
+    </script>
 </body>
 </html>
