@@ -42,6 +42,7 @@ async function getSpotifyArtistImage(name) {
 function saveFavorites() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
 }
+
 async function getTopTrack(artistName) {
     try {
         const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&entity=song&limit=1`);
@@ -67,9 +68,12 @@ function getArtistImage(a) {
 
     if (img && img.trim() !== "") return img;
 
-    // fallback (always works)
     return `https://placehold.co/300x300/1a003d/ffffff?text=${encodeURIComponent(a.name)}`;
 }
+
+/* =====================
+   YOUTUBE VIDEO
+===================== */
 async function getYouTubeVideoId(artist, song) {
     const query = encodeURIComponent(`${artist} ${song} official music video`);
 
@@ -81,8 +85,10 @@ async function getYouTubeVideoId(artist, song) {
 
     return data.items?.[0]?.id?.videoId || null;
 }
-}
 
+/* =====================
+   SPOTIFY LINK
+===================== */
 function openSpotify(name) {
     window.open(`https://open.spotify.com/search/${encodeURIComponent(name)}`, "_blank");
 }
@@ -144,111 +150,122 @@ async function search() {
 
     for (const a of artists.slice(0, 12)) {
 
-    const img = getArtistImage(a);
-    const track = await getTopTrack(a.name);
+        const img = getArtistImage(a);
+        const track = await getTopTrack(a.name);
 
-    const card = document.createElement("div");
-    card.className = "artist-card";
+        const card = document.createElement("div");
+        card.className = "artist-card";
 
-    card.innerHTML = `
-        <img src="${img}">
-        <div class="card-info">
-            <h3>${a.name}</h3>
-            <p>${Math.round(a.match * 100)}%</p>
-            ${track ? `
-    <p class="track-name">🎵 ${track.name}</p>
-    <button class="video-btn">🎬 Watch Video</button>
-    <div class="video-container" style="display:none;"></div>
-` : ""}
-        </div>
-        <div class="card-actions">
-            <button class="spotify-btn">Spotify</button>
-            ${track?.preview ? `<button class="play-btn">▶️</button>` : ""}
-            <button class="fav-btn">
-                ${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}
-            </button>
-        </div>
-    `;
+        card.innerHTML = `
+            <img src="${img}">
+            <div class="card-info">
+                <h3>${a.name}</h3>
+                <p>${Math.round(a.match * 100)}%</p>
 
-   if (track?.preview) {
-
-    const videoBtn = card.querySelector(".video-btn");
-    const container = card.querySelector(".video-container");
-
-    videoBtn.onclick = async (e) => {
-        e.stopPropagation();
-
-        if (container.style.display === "block") {
-            container.innerHTML = "";
-            container.style.display = "none";
-            return;
-        }
-
-        container.innerHTML = "Loading video...";
-
-        const videoId = await getYouTubeVideoId(a.name, track.name);
-
-        if (!videoId) {
-            container.innerHTML = "<p>No video found</p>";
-            return;
-        }
-
-        container.innerHTML = `
-            <iframe width="100%" height="200"
-                src="https://www.youtube.com/embed/${videoId}"
-                frameborder="0"
-                allow="autoplay; encrypted-media"
-                allowfullscreen>
-            </iframe>
+                ${track ? `
+                    <p class="track-name">🎵 ${track.name}</p>
+                    <button class="video-btn">🎬 Watch Video</button>
+                    <div class="video-container" style="display:none;"></div>
+                ` : ""}
+            </div>
+            <div class="card-actions">
+                <button class="spotify-btn">Spotify</button>
+                ${track?.preview ? `<button class="play-btn">▶️</button>` : ""}
+                <button class="fav-btn">
+                    ${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}
+                </button>
+            </div>
         `;
 
-        container.style.display = "block";
-    };
-}
-    card.querySelector(".spotify-btn").onclick = (e) => {
-        e.stopPropagation();
-        openSpotify(a.name);
-    };
+        /* =====================
+           YOUTUBE BUTTON LOGIC
+        ===================== */
+        const videoBtn = card.querySelector(".video-btn");
+        const container = card.querySelector(".video-container");
 
-    // ❤️ favorite
-    card.querySelector(".fav-btn").onclick = (e) => {
-        e.stopPropagation();
-        toggleFavorite(a.name, img);
-        search();
-    };
+        if (videoBtn && container && track) {
+            videoBtn.onclick = async (e) => {
+                e.stopPropagation();
 
-    // ▶️ play preview
-    if (track?.preview) {
-        const playBtn = card.querySelector(".play-btn");
+                if (container.style.display === "block") {
+                    container.innerHTML = "";
+                    container.style.display = "none";
+                    return;
+                }
 
-        playBtn.onclick = (e) => {
-            e.stopPropagation();
+                container.innerHTML = "Loading video...";
 
-            // stop previous audio
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio = null;
-                document.querySelectorAll(".play-btn").forEach(b => b.textContent = "▶️");
-            }
+                const videoId = await getYouTubeVideoId(a.name, track.name);
 
-            const audio = new Audio(track.preview);
+                if (!videoId) {
+                    container.innerHTML = "<p>No video found</p>";
+                    return;
+                }
 
-            audio.play();
-            currentAudio = audio;
-            playBtn.textContent = "⏸️";
+                container.innerHTML = `
+                    <iframe width="100%" height="200"
+                        src="https://www.youtube.com/embed/${videoId}"
+                        frameborder="0"
+                        allow="autoplay; encrypted-media"
+                        allowfullscreen>
+                    </iframe>
+                `;
 
-            audio.onended = () => {
-                playBtn.textContent = "▶️";
-                currentAudio = null;
+                container.style.display = "block";
             };
-        };
-    }
+        }
 
-    results.appendChild(card);
+        /* =====================
+           SPOTIFY BUTTON
+        ===================== */
+        card.querySelector(".spotify-btn").onclick = (e) => {
+            e.stopPropagation();
+            openSpotify(a.name);
+        };
+
+        /* =====================
+           FAVORITE BUTTON
+        ===================== */
+        card.querySelector(".fav-btn").onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(a.name, img);
+            search();
+        };
+
+        /* =====================
+           AUDIO PREVIEW
+        ===================== */
+        if (track?.preview) {
+            const playBtn = card.querySelector(".play-btn");
+
+            playBtn.onclick = (e) => {
+                e.stopPropagation();
+
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                    document.querySelectorAll(".play-btn").forEach(b => b.textContent = "▶️");
+                }
+
+                const audio = new Audio(track.preview);
+                audio.play();
+                currentAudio = audio;
+                playBtn.textContent = "⏸️";
+
+                audio.onended = () => {
+                    playBtn.textContent = "▶️";
+                    currentAudio = null;
+                };
+            };
+        }
+
+        results.appendChild(card);
     }
 }
 
-/* INIT */
+/* =====================
+   INIT
+===================== */
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("artist").addEventListener("keypress", e => {
         if (e.key === "Enter") search();
