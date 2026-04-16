@@ -1,7 +1,7 @@
 const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
 
-const SPOTIFY_CLIENT_ID = "YOUR_CLIENT_ID";
-const SPOTIFY_CLIENT_SECRET = "YOUR_CLIENT_SECRET";
+const SPOTIFY_CLIENT_ID = "d1d9a544e07a4dd999fe4cd3dbf26ebd";
+const SPOTIFY_CLIENT_SECRET = "0d05c8793cb846e3a8a17519269458dd";
 
 let spotifyToken = null;
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
