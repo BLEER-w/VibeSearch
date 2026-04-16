@@ -4,7 +4,11 @@ const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
 // Function to handle search button click and form submission
 function handleSearch() {
     const artistInput = document.getElementById('artist-input').value;
-
+function openModal(name, bio) {
+    document.getElementById('modal-name').textContent = name;
+    document.getElementById('modal-bio').textContent = bio;
+    document.getElementById('artist-modal').style.display = 'block';
+}
     // Check if input is empty
     if (!artistInput) {
         alert('Please enter an artist name.');
@@ -46,3 +50,13 @@ document.getElementById('search-form').addEventListener('submit', function(event
 });
 
 document.getElementById('search-button').addEventListener('click', handleSearch);
+document.querySelector('.close-btn').onclick = () => {
+    document.getElementById('artist-modal').style.display = 'none';
+};
+
+window.onclick = (e) => {
+    const modal = document.getElementById('artist-modal');
+    if (e.target === modal) {
+        modal.style.display = 'none';
+    }
+};
