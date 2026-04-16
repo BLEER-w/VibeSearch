@@ -100,6 +100,43 @@ function openFavoritesPage() {
         results.appendChild(card);
     });
 }
+function openAbout() {
+    let modal = document.getElementById("about-modal");
+
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "about-modal";
+        modal.className = "about-modal";
+
+        modal.innerHTML = `
+            <div class="about-content">
+                <h2>🎵 About VibeSearch</h2>
+                <p>
+                    VibeSearch lets you discover artists similar to your favorites.
+                </p>
+
+                <p>
+                    🔎 Search any artist<br>
+                    🎧 Listen to song previews<br>
+                    🎬 Watch music videos<br>
+                    ❤️ Save favorites<br>
+                    🎵 Open Spotify pages
+                </p>
+
+                <button onclick="closeAbout()" class="search-btn">Close</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    }
+
+    modal.style.display = "block";
+}
+
+function closeAbout() {
+    const modal = document.getElementById("about-modal");
+    if (modal) modal.style.display = "none";
+}
 
 /* ================= SEARCH ================= */
 async function search() {
