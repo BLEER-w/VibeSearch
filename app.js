@@ -1,73 +1,15 @@
+// =====================
+// API KEY (FIXED)
+// =====================
+const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
 
 // =====================
-// API KEYS
-// =====================
-const API_KEY = '3bd4b23b8db71c70de8380ebc7c4bccb';
-
-// =====================
-// STATE
+// FAVORITES
 // =====================
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-let searchCache = [];
 
-// =====================
-// SAVE FAVORITES
-// =====================
 function saveFavorites() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
-}
-
-// =====================
-// SPOTIFY SEARCH LINK
-// =====================
-function openSpotify(name) {
-    const url = `https://open.spotify.com/search/${encodeURIComponent(name)}`;
-    window.open(url, "_blank");
-}
-
-// =====================
-// FAVORITES TOGGLE
-// =====================
-function toggleFavorite(name) {
-    if (favorites.includes(name)) {
-        favorites = favorites.filter(a => a !== name);
-    } else {
-        favorites.push(name);
-    }
-    saveFavorites();
-    renderFavoritesBadge();
-}
-
-// =====================
-// FAVORITES PAGE
-// =====================
-function openFavoritesPage() {
-    const results = document.getElementById("results");
-
-    if (favorites.length === 0) {
-        results.innerHTML = `<div class="message">No favorites yet ❤️</div>`;
-        return;
-    }
-
-    results.innerHTML = `<h2 style="grid-column:1/-1;text-align:center;">❤️ Your Favorites</h2>`;
-
-    favorites.forEach(name => {
-        const card = document.createElement("div");
-        card.className = "artist-card";
-        card.innerHTML = `
-            <div class="card-img-wrapper">
-                <img src="https://via.placeholder.com/300x300?text=${name}">
-                <div class="overlay">▶</div>
-            </div>
-            <div class="card-info">
-                <h3>${name}</h3>
-            </div>
-        `;
-
-        card.onclick = () => openSpotify(name);
-
-        results.appendChild(card);
-    });
 }
 
 // =====================
@@ -79,128 +21,77 @@ function openModal(name, bio) {
     document.getElementById('artist-modal').style.display = 'block';
 }
 
-// close modal
-document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('artist-modal');
-
-    document.querySelector('.close-btn').onclick = () => {
-        modal.style.display = 'none';
-    };
-
-    window.onclick = (e) => {
-        if (e.target === modal) modal.style.display = 'none';
-    };
-});
-
 // =====================
-// AUTOCOMPLETE (Spotify-like)
+// SPOTIFY LINK
 // =====================
-function setupAutocomplete() {
-    const input = document.getElementById("artist");
-    const box = document.createElement("div");
-    box.id = "autocomplete-box";
-    box.style.position = "absolute";
-    box.style.background = "#1a1a2e";
-    box.style.width = input.offsetWidth + "px";
-    box.style.zIndex = "1000";
-
-    input.parentNode.appendChild(box);
-
-    input.addEventListener("input", async () => {
-        const query = input.value;
-        if (!query) return box.innerHTML = "";
-
-        const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.search&artist=${query}&api_key=${API_KEY}&format=json`);
-        const data = await res.json();
-
-        const results = data.results.artistmatches.artist.slice(0, 5);
-
-        box.innerHTML = results.map(a => `
-            <div class="auto-item" onclick="selectArtist('${a.name}')">
-                🎵 ${a.name}
-            </div>
-        `).join("");
-    });
+function openSpotify(name) {
+    window.open(`https://open.spotify.com/search/${encodeURIComponent(name)}`, "_blank");
 }
 
-function selectArtist(name) {
-    document.getElementById("artist").value = name;
-    document.getElementById("autocomplete-box").innerHTML = "";
-    search();
+// =====================
+// FAVORITE TOGGLE
+// =====================
+function toggleFavorite(name) {
+    if (favorites.includes(name)) {
+        favorites = favorites.filter(a => a !== name);
+    } else {
+        favorites.push(name);
+    }
+    saveFavorites();
 }
 
 // =====================
 // SEARCH
 // =====================
 function search() {
-    const artist = document.getElementById('artist').value;
-    if (!artist) return alert('Enter an artist name');
+    const input = document.getElementById('artist');
+    const results = document.getElementById('results');
 
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '<div class="message">Loading...</div>';
+    if (!input.value) return alert("Enter artist");
 
-    fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artist)}&api_key=${API_KEY}&format=json`)
-        .then(res => res.json())
+    results.innerHTML = "Loading...";
+
+    fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(input.value)}&api_key=${API_KEY}&format=json`)
+        .then(r => r.json())
         .then(data => {
 
-            const artists = data.similarartists.artist || [];
-            resultsDiv.innerHTML = "";
+            results.innerHTML = "";
 
-            artists.slice(0, 12).forEach(a => {
+            const artists = data.similarartists?.artist || [];
 
-                fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(a.name)}&api_key=${API_KEY}&format=json`)
-                    .then(res => res.json())
-                    .then(info => {
+            artists.slice(0, 10).forEach(a => {
 
-                        let bio = "No description available";
+                const card = document.createElement("div");
+                card.className = "artist-card";
 
-                        if (info.artist?.bio?.summary) {
-                            bio = info.artist.bio.summary
-                                .replace(/<[^>]+>/g, '')
-                                .slice(0, 120) + "...";
-                        }
+                card.innerHTML = `
+                    <img src="${a.image?.[2]?.['#text'] || ''}">
+                    <h3>${a.name}</h3>
+                    <p>${Math.round(a.match * 100)}%</p>
 
-                        const card = document.createElement("div");
-                        card.className = "artist-card animate";
+                    <button onclick="event.stopPropagation(); openSpotify('${a.name}')">
+                        Spotify
+                    </button>
 
-                        card.innerHTML = `
-                            <div class="card-img-wrapper">
-                                <img src="${a.image?.[2]?.['#text'] || ''}">
-                                <div class="overlay">▶</div>
-                            </div>
+                    <button onclick="event.stopPropagation(); toggleFavorite('${a.name}')">
+                        ${favorites.includes(a.name) ? "❤️" : "🤍"}
+                    </button>
+                `;
 
-                            <div class="card-info">
-                                <h3>${a.name}</h3>
-                                <p>${Math.round(a.match * 100)}% match</p>
-                            </div>
+                card.onclick = () => {
+                    fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(a.name)}&api_key=${API_KEY}&format=json`)
+                        .then(r => r.json())
+                        .then(info => {
+                            const bio = info.artist?.bio?.summary?.replace(/<[^>]+>/g, '') || "No bio";
+                            openModal(a.name, bio);
+                        });
+                };
 
-                            <div class="card-actions">
-                                <button class="fav-btn">
-                                    ${favorites.includes(a.name) ? "❤️" : "🤍"}
-                                </button>
-                                <button class="spotify-btn">Spotify</button>
-                            </div>
-                        `;
-
-                        // modal
-                        card.onclick = () => openModal(a.name, bio);
-
-                        // favorite
-                        card.querySelector(".fav-btn").onclick = (e) => {
-                            e.stopPropagation();
-                            toggleFavorite(a.name);
-                            search();
-                        };
-
-                        // spotify
-                        card.querySelector(".spotify-btn").onclick = (e) => {
-                            e.stopPropagation();
-                            openSpotify(a.name);
-                        };
-
-                        resultsDiv.appendChild(card);
-                    });
+                results.appendChild(card);
             });
+        })
+        .catch(() => {
+            results.innerHTML = "Error loading data";
         });
 }
 
@@ -208,10 +99,18 @@ function search() {
 // INIT
 // =====================
 document.addEventListener("DOMContentLoaded", () => {
+
     document.getElementById('artist').addEventListener('keypress', e => {
         if (e.key === 'Enter') search();
     });
 
-    setupAutocomplete();
-    renderFavoritesBadge();
+    document.querySelector('.close-btn').onclick = () => {
+        document.getElementById('artist-modal').style.display = 'none';
+    };
+
+    window.onclick = (e) => {
+        if (e.target.id === 'artist-modal') {
+            document.getElementById('artist-modal').style.display = 'none';
+        }
+    };
 });
