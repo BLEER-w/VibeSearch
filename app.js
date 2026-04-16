@@ -1,24 +1,24 @@
-// Last.fm API Key (replace with your own key)
+// Last.fm API Key
 const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
 
-// Function to handle search button click and form submission
-function handleSearch() {
-    const artistInput = document.getElementById('artist-input').value;
+// ✅ Modal function (MOVE OUTSIDE)
 function openModal(name, bio) {
     document.getElementById('modal-name').textContent = name;
     document.getElementById('modal-bio').textContent = bio;
     document.getElementById('artist-modal').style.display = 'block';
 }
-    // Check if input is empty
+
+// Search function
+function handleSearch() {
+    const artistInput = document.getElementById('artist-input').value;
+
     if (!artistInput) {
         alert('Please enter an artist name.');
         return;
     }
 
-    // API endpoint for searching similar artists
     const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artistInput)}&api_key=${API_KEY}&format=json`;
 
-    // Fetch similar artists from Last.fm API
     fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -31,25 +31,49 @@ function openModal(name, bio) {
         });
 }
 
-// Function to display similar artists on the webpage
+// ✅ UPDATED display function (THIS is the big change)
 function displayArtists(artists) {
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = '';
-    
-    artists.forEach(artist => {
-        const artistElement = document.createElement('div');
-        artistElement.textContent = artist.name;
-        resultsDiv.appendChild(artistElement);
+
+    artists.slice(0, 12).forEach(a => {
+        const img = a.image[2] ? a.image[2]['#text'] : '';
+
+        // fetch bio
+        fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(a.name)}&api_key=${API_KEY}&format=json`)
+            .then(res => res.json())
+            .then(infoData => {
+                let bio = "No description available";
+
+                if (infoData.artist && infoData.artist.bio && infoData.artist.bio.summary) {
+                    bio = infoData.artist.bio.summary
+                        .replace(/<[^>]+>/g, '')
+                        .slice(0, 120) + '...';
+                }
+
+                const card = `
+                    <div class="artist-card" onclick="openModal('${a.name.replace(/'/g, "\\'")}', \`${bio.replace(/`/g, "")}\`)">
+                        <img src="${img}">
+                        <h3>${a.name}</h3>
+                        <p>${Math.round(a.match * 100)}% match</p>
+                        <p class="artist-description">${bio}</p>
+                    </div>
+                `;
+
+                resultsDiv.innerHTML += card;
+            });
     });
 }
 
-// Event listeners for form submission and button click
+// Event listeners
 document.getElementById('search-form').addEventListener('submit', function(event) {
     event.preventDefault();
     handleSearch();
 });
 
 document.getElementById('search-button').addEventListener('click', handleSearch);
+
+// Modal close
 document.querySelector('.close-btn').onclick = () => {
     document.getElementById('artist-modal').style.display = 'none';
 };
