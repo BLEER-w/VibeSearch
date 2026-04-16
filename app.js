@@ -69,6 +69,10 @@ function getArtistImage(a) {
     // fallback (always works)
     return `https://placehold.co/300x300/1a003d/ffffff?text=${encodeURIComponent(a.name)}`;
 }
+function getYouTubeEmbedUrl(artist, song) {
+    const query = encodeURIComponent(`${artist} ${song}`);
+    return `https://www.youtube.com/embed?autoplay=1&rel=0&modestbranding=1&controls=1&showinfo=0&listType=search&list=${query}`;
+}
 
 function openSpotify(name) {
     window.open(`https://open.spotify.com/search/${encodeURIComponent(name)}`, "_blank");
