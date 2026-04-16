@@ -1,5 +1,5 @@
 // Last.fm API Key (replace with your own key)
-const API_KEY = 'YOUR_API_KEY';
+const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
 
 // Function to handle search button click and form submission
 function handleSearch() {
