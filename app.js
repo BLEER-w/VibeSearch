@@ -130,39 +130,70 @@ async function search() {
     results.innerHTML = "";
 
     for (const a of artists.slice(0, 12)) {
-        const img = getArtistImage(a);
-        const card = document.createElement("div");
-        card.className = "artist-card";
 
-        card.innerHTML = `
-            <img src="${img}">
-            <div class="card-info">
-                <h3>${a.name}</h3>
-                <p>${Math.round(a.match * 100)}%</p>
-            </div>
-            <div class="card-actions">
-                <button class="spotify-btn">Spotify</button>
-                <button class="fav-btn">
-                    ${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}
-                </button>
-            </div>
-        `;
+    const img = getArtistImage(a);
+    const track = await getTopTrack(a.name);
 
-        card.onclick = () => openSpotify(a.name);
+    const card = document.createElement("div");
+    card.className = "artist-card";
 
-        card.querySelector(".spotify-btn").onclick = (e) => {
+    card.innerHTML = `
+        <img src="${img}">
+        <div class="card-info">
+            <h3>${a.name}</h3>
+            <p>${Math.round(a.match * 100)}%</p>
+            ${track ? `<p class="track-name">🎵 ${track.name}</p>` : ""}
+        </div>
+        <div class="card-actions">
+            <button class="spotify-btn">Spotify</button>
+            ${track?.preview ? `<button class="play-btn">▶️</button>` : ""}
+            <button class="fav-btn">
+                ${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}
+            </button>
+        </div>
+    `;
+
+    // open spotify
+    card.querySelector(".spotify-btn").onclick = (e) => {
+        e.stopPropagation();
+        openSpotify(a.name);
+    };
+
+    // ❤️ favorite
+    card.querySelector(".fav-btn").onclick = (e) => {
+        e.stopPropagation();
+        toggleFavorite(a.name, img);
+        search();
+    };
+
+    // ▶️ play preview
+    if (track?.preview) {
+        const playBtn = card.querySelector(".play-btn");
+
+        playBtn.onclick = (e) => {
             e.stopPropagation();
-            openSpotify(a.name);
-        };
 
-        card.querySelector(".fav-btn").onclick = (e) => {
-            e.stopPropagation();
-            toggleFavorite(a.name, img);
-            search();
-        };
+            // stop previous audio
+            if (currentAudio) {
+                currentAudio.pause();
+                currentAudio = null;
+                document.querySelectorAll(".play-btn").forEach(b => b.textContent = "▶️");
+            }
 
-        results.appendChild(card);
+            const audio = new Audio(track.preview);
+
+            audio.play();
+            currentAudio = audio;
+            playBtn.textContent = "⏸️";
+
+            audio.onended = () => {
+                playBtn.textContent = "▶️";
+                currentAudio = null;
+            };
+        };
     }
+
+    results.appendChild(card);
 }
 
 /* INIT */
