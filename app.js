@@ -1,86 +1,93 @@
 // Last.fm API Key
 const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
 
-// ✅ Modal function (MOVE OUTSIDE)
+// --------------------
+// MODAL
+// --------------------
 function openModal(name, bio) {
     document.getElementById('modal-name').textContent = name;
     document.getElementById('modal-bio').textContent = bio;
     document.getElementById('artist-modal').style.display = 'block';
 }
 
-// Search function
-function handleSearch() {
-    const artistInput = document.getElementById('artist-input').value;
+// close modal
+document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('artist-modal');
 
-    if (!artistInput) {
-        alert('Please enter an artist name.');
-        return;
-    }
+    document.querySelector('.close-btn').onclick = () => {
+        modal.style.display = 'none';
+    };
 
-    const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artistInput)}&api_key=${API_KEY}&format=json`;
+    window.onclick = (e) => {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+});
 
-    fetch(url)
-        .then(response => response.json())
+// --------------------
+// SEARCH
+// --------------------
+function search() {
+    const artist = document.getElementById('artist').value;
+    if (!artist) return alert('Enter an artist name');
+
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = '<div class="message">Loading...</div>';
+
+    fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artist)}&api_key=${API_KEY}&format=json`)
+        .then(res => res.json())
         .then(data => {
-            const similarArtists = data.similarartists.artist;
-            displayArtists(similarArtists);
+            if (data.error) {
+                resultsDiv.innerHTML = '<div class="message">Artist not found</div>';
+                return;
+            }
+
+            const artists = data.similarartists.artist || [];
+            resultsDiv.innerHTML = '';
+
+            artists.slice(0, 12).forEach(a => {
+                const img = a.image?.[2]?.['#text'] || '';
+
+                // fetch bio for each artist
+                fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(a.name)}&api_key=${API_KEY}&format=json`)
+                    .then(res => res.json())
+                    .then(info => {
+
+                        let bio = "No description available";
+
+                        if (info.artist?.bio?.summary) {
+                            bio = info.artist.bio.summary
+                                .replace(/<[^>]+>/g, '')
+                                .slice(0, 120) + '...';
+                        }
+
+                        const card = document.createElement('div');
+                        card.className = 'artist-card';
+
+                        card.innerHTML = `
+                            <img src="${img}">
+                            <h3>${a.name}</h3>
+                            <p>${Math.round(a.match * 100)}% match</p>
+                        `;
+
+                        card.onclick = () => openModal(a.name, bio);
+
+                        resultsDiv.appendChild(card);
+                    });
+            });
         })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-            alert('An error occurred while searching for similar artists.');
+        .catch(err => {
+            console.error(err);
+            resultsDiv.innerHTML = '<div class="message">Error fetching data</div>';
         });
 }
 
-// ✅ UPDATED display function (THIS is the big change)
-function displayArtists(artists) {
-    const resultsDiv = document.getElementById('results');
-    resultsDiv.innerHTML = '';
-
-    artists.slice(0, 12).forEach(a => {
-        const img = a.image[2] ? a.image[2]['#text'] : '';
-
-        // fetch bio
-        fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(a.name)}&api_key=${API_KEY}&format=json`)
-            .then(res => res.json())
-            .then(infoData => {
-                let bio = "No description available";
-
-                if (infoData.artist && infoData.artist.bio && infoData.artist.bio.summary) {
-                    bio = infoData.artist.bio.summary
-                        .replace(/<[^>]+>/g, '')
-                        .slice(0, 120) + '...';
-                }
-
-                const card = `
-                    <div class="artist-card" onclick="openModal('${a.name.replace(/'/g, "\\'")}', \`${bio.replace(/`/g, "")}\`)">
-                        <img src="${img}">
-                        <h3>${a.name}</h3>
-                        <p>${Math.round(a.match * 100)}% match</p>
-                        <p class="artist-description">${bio}</p>
-                    </div>
-                `;
-
-                resultsDiv.innerHTML += card;
-            });
+// --------------------
+// ENTER KEY SUPPORT
+// --------------------
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('artist').addEventListener('keypress', e => {
+        if (e.key === 'Enter') search();
     });
-}
-
-// Event listeners
-document.getElementById('search-form').addEventListener('submit', function(event) {
-    event.preventDefault();
-    handleSearch();
 });
-
-document.getElementById('search-button').addEventListener('click', handleSearch);
-
-// Modal close
-document.querySelector('.close-btn').onclick = () => {
-    document.getElementById('artist-modal').style.display = 'none';
-};
-
-window.onclick = (e) => {
-    const modal = document.getElementById('artist-modal');
-    if (e.target === modal) {
-        modal.style.display = 'none';
-    }
-};
