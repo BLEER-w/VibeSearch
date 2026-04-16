@@ -113,9 +113,7 @@ async function search() {
     results.innerHTML = "";
 
     for (const a of artists.slice(0, 12)) {
-        const spotifyImg = await getSpotifyArtistImage(a.name);
-        const img = spotifyImg || getArtistImage(a);
-
+        const img = getArtistImage(a);
         const card = document.createElement("div");
         card.className = "artist-card";
 
