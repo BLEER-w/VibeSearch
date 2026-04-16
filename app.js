@@ -42,7 +42,15 @@ function saveFavorites() {
 }
 
 function getArtistImage(a) {
-    return a.image?.[3]?.['#text'] || "";
+    const img =
+        a.image?.[3]?.['#text'] ||
+        a.image?.[2]?.['#text'] ||
+        a.image?.[1]?.['#text'];
+
+    if (img && img.trim() !== "") return img;
+
+    // fallback (always works)
+    return `https://placehold.co/300x300/1a003d/ffffff?text=${encodeURIComponent(a.name)}`;
 }
 
 function openSpotify(name) {
