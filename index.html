@@ -3,17 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeSearch - Find Similar Artists</title>
-    <link rel="stylesheet" href="style.css">
+    <title>VibeSearch</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0014 0%, #1a003d 50%, #0a0014 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #00d4ff;
+        }
+        
+        .search-box {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        
+        input {
+            width: 300px;
+            padding: 12px;
+            border: 2px solid #7c3aed;
+            border-radius: 25px;
+            background: rgba(20, 20, 40, 0.8);
+            color: white;
+            font-size: 1em;
+        }
+        
+        button {
+            padding: 12px 30px;
+            background: #7c3aed;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover { background: #00d4ff; }
+        
+        #results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .artist-card {
+            background: rgba(40, 20, 80, 0.8);
+            border: 2px solid #7c3aed;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .artist-card:hover {
+            border-color: #00d4ff;
+            transform: scale(1.05);
+        }
+        
+        .artist-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .artist-card h3 {
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+        
+        .message {
+            text-align: center;
+            color: #b0b0ff;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>🎵 VibeSearch</h1>
-        <p>Discover artists similar to your favorites</p>
         
         <div class="search-box">
-            <input type="text" id="artistInput" class="search-input" placeholder="Enter an artist name...">
-            <button id="searchBtn" class="search-button">Search</button>
+            <input type="text" id="artist" placeholder="Enter artist name...">
+            <button onclick="search()">Search</button>
         </div>
         
         <div id="results"></div>
@@ -21,63 +111,40 @@
 
     <script>
         const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
-        const CORS_URL = 'https://cors-anywhere.herokuapp.com/';
-
-        document.getElementById('searchBtn').addEventListener('click', searchArtist);
-        document.getElementById('artistInput').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') searchArtist();
-        });
-
-        async function searchArtist() {
-            const artistName = document.getElementById('artistInput').value.trim();
+        
+        function search() {
+            const artist = document.getElementById('artist').value;
+            if (!artist) return alert('Enter an artist name');
             
-            if (!artistName) {
-                alert('Please enter an artist name');
-                return;
-            }
-
-            document.getElementById('results').innerHTML = '<p style="text-align: center; color: white;">Loading...</p>';
-
-            try {
-                const url = `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artistName)}&api_key=${API_KEY}&format=json`;
-                
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.error) {
-                    document.getElementById('results').innerHTML = '<p style="text-align: center; color: #ff6b6b;">Artist not found. Try again!</p>';
-                    return;
-                }
-
-                if (!data.similarartists || !data.similarartists.artist) {
-                    document.getElementById('results').innerHTML = '<p style="text-align: center; color: #ff6b6b;">No similar artists found</p>';
-                    return;
-                }
-
-                displayArtists(data.similarartists.artist);
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('results').innerHTML = '<p style="text-align: center; color: #ff6b6b;">Error fetching data</p>';
-            }
+            document.getElementById('results').innerHTML = '<div class="message">Loading...</div>';
+            
+            fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${artist}&api_key=${API_KEY}&format=json`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('results').innerHTML = '<div class="message">Artist not found</div>';
+                        return;
+                    }
+                    
+                    const artists = data.similarartists.artist || [];
+                    let html = '';
+                    
+                    artists.slice(0, 12).forEach(a => {
+                        const img = a.image[2] ? a.image[2]['#text'] : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="150" height="150"%3E%3Crect fill="%23333" width="150" height="150"/%3E%3C/svg%3E';
+                        html += `<div class="artist-card" onclick="document.getElementById('artist').value='${a.name}';search()"><img src="${img}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%22150%22%3E%3Crect fill=%22%23333%22 width=%22150%22 height=%22150%22/%3E%3C/svg%3E'"><h3>${a.name}</h3><p>${Math.round(a.match*100)}% match</p></div>`;
+                    });
+                    
+                    document.getElementById('results').innerHTML = html || '<div class="message">No results found</div>';
+                })
+                .catch(e => {
+                    console.error(e);
+                    document.getElementById('results').innerHTML = '<div class="message">Error fetching data</div>';
+                });
         }
-
-        function displayArtists(artists) {
-            let html = '';
-            artists.slice(0, 12).forEach(artist => {
-                const img = artist.image && artist.image[2] ? artist.image[2]['#text'] : 'https://via.placeholder.com/150?text=No+Image';
-                const match = Math.round(artist.match * 100);
-                
-                html += `
-                    <div class="artist-card" onclick="document.getElementById('artistInput').value='${artist.name.replace(/'/g, "\\'")}'; searchArtist();">
-                        <img src="${img}" alt="${artist.name}" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
-                        <h3>${artist.name}</h3>
-                        <p style="color: #b0b0ff;">${match}% match</p>
-                    </div>
-                `;
-            });
-
-            document.getElementById('results').innerHTML = html;
-        }
+        
+        document.getElementById('artist').addEventListener('keypress', e => {
+            if (e.key === 'Enter') search();
+        });
     </script>
 </body>
 </html>
