@@ -131,7 +131,29 @@ button {
     width: 100%;
     border-radius: 10px;
 }
+.about-btn {
+    background: #00d4ff;
+    color: black;
+}
 
+/* ABOUT MODAL */
+.about-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 999;
+}
+
+.about-content {
+    background: #1a003d;
+    margin: 10% auto;
+    padding: 20px;
+    max-width: 500px;
+    border-radius: 12px;
+    color: white;
+    text-align: center;
+}
 .video-container {
     margin-top: 10px;
     border-radius: 10px;
