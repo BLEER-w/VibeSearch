@@ -194,6 +194,7 @@ async function search() {
     }
 
     results.appendChild(card);
+    }
 }
 
 /* INIT */
