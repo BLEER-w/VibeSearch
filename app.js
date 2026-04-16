@@ -1,236 +1,167 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VibeSearch</title>
+const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
 
-<style>
-/* =========================
-   🌌 GALAXY BACKGROUND
-========================= */
-body {
-    margin: 0;
-    min-height: 100vh;
-    overflow-x: hidden;
-    font-family: 'Segoe UI', sans-serif;
-    color: white;
-    background: radial-gradient(circle at 20% 20%, #2a0a4a, transparent 40%),
-                radial-gradient(circle at 80% 30%, #0a1b4a, transparent 40%),
-                radial-gradient(circle at 50% 80%, #3b0a4a, transparent 40%),
-                #05010a;
+let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
+function saveFavorites() {
+    localStorage.setItem("favorites", JSON.stringify(favorites));
 }
 
-/* moving nebula */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at 30% 40%, rgba(124,58,237,0.25), transparent 40%),
-                radial-gradient(circle at 70% 60%, rgba(0,212,255,0.15), transparent 45%);
-    animation: drift 12s ease-in-out infinite alternate;
-    z-index: -2;
+function renderFavoritesBadge() {
+    const el = document.getElementById("fav-count");
+    if (el) el.textContent = favorites.length;
 }
 
-/* stars */
-body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(white 1px, transparent 1px);
-    background-size: 40px 40px;
-    opacity: 0.15;
-    animation: starMove 60s linear infinite;
-    z-index: -1;
+/* =====================
+   IMAGE FIX (IMPORTANT)
+===================== */
+function getArtistImage(a) {
+    const img =
+        a.image?.[3]?.['#text'] ||
+        a.image?.[2]?.['#text'] ||
+        a.image?.[1]?.['#text'];
+
+    if (img && img.length > 0) return img;
+
+    return `https://placehold.co/300x300/1a003d/ffffff?text=${encodeURIComponent(a.name)}`;
 }
 
-@keyframes drift {
-    from { transform: translate(0,0) scale(1); }
-    to { transform: translate(25px,-25px) scale(1.1); }
-}
-
-@keyframes starMove {
-    from { transform: translateY(0); }
-    to { transform: translateY(-200px); }
-}
-
-/* =========================
-   HEADER
-========================= */
-.header {
-    text-align: center;
-    padding: 20px;
-}
-
-.header h1 {
-    font-size: 2.5em;
-    color: #00d4ff;
-}
-
-/* =========================
-   SEARCH
-========================= */
-.search-section {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    padding: 20px;
-    position: relative;
-}
-
-#artist {
-    width: 300px;
-    padding: 12px;
-    border-radius: 25px;
-    border: none;
-    background: #1a003d;
-    color: white;
-}
-
-button {
-    padding: 12px 16px;
-    border-radius: 20px;
-    border: none;
-    cursor: pointer;
-}
-
-.search-btn { background:#7c3aed; color:white; }
-.fav-btn-top { background:#ff4081; color:white; }
-
-/* =========================
-   RESULTS
-========================= */
-#results {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-/* =========================
-   CARD (Spotify style)
-========================= */
-.artist-card {
-    background: #120022;
-    border-radius: 14px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: 0.3s;
-    position: relative;
-}
-
-.artist-card:hover {
-    transform: translateY(-6px) scale(1.02);
-}
-
-.artist-card img {
-    width: 100%;
-    height: 160px;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.artist-card:hover img {
-    transform: scale(1.05);
-}
-
-.card-info {
-    padding: 10px;
-}
-
-.card-info h3 {
-    color: #00d4ff;
-    margin: 0;
-}
-
-/* buttons */
-.card-actions {
-    display:flex;
-    justify-content: space-between;
-    padding: 10px;
-}
-
-.spotify-btn {
-    background:#1DB954;
-    color:white;
-}
-
-.fav-btn {
-    background:#ff4081;
-    color:white;
-}
-
-/* =========================
-   AUTOCOMPLETE
-========================= */
-#autocomplete-box {
-    position:absolute;
-    top:60px;
-    background:#1a003d;
-    width:300px;
-    border-radius:10px;
-    overflow:hidden;
-    z-index:10;
-}
-
-.auto-item {
-    padding:10px;
-    cursor:pointer;
-}
-
-.auto-item:hover {
-    background:#7c3aed;
-}
-
-/* =========================
+/* =====================
    MODAL
-========================= */
-.modal {
-    display:none;
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.8);
+===================== */
+function openModal(name, bio) {
+    document.getElementById('modal-name').textContent = name;
+    document.getElementById('modal-bio').textContent = bio;
+    document.getElementById('artist-modal').style.display = 'block';
 }
 
-.modal-content {
-    background:#1a003d;
-    margin:10% auto;
-    padding:20px;
-    width:90%;
-    max-width:500px;
-    border-radius:10px;
+/* =====================
+   SPOTIFY LINK
+===================== */
+function openSpotify(name) {
+    window.open(`https://open.spotify.com/search/${encodeURIComponent(name)}`, "_blank");
 }
 
-.close-btn {
-    float:right;
-    cursor:pointer;
+/* =====================
+   FAVORITES PAGE
+===================== */
+function openFavoritesPage() {
+    const results = document.getElementById("results");
+
+    if (favorites.length === 0) {
+        results.innerHTML = "<p style='text-align:center'>No favorites yet ❤️</p>";
+        return;
+    }
+
+    results.innerHTML = "";
+
+    favorites.forEach(name => {
+        const card = document.createElement("div");
+        card.className = "artist-card";
+        card.innerHTML = `
+            <img src="https://placehold.co/300x300/1a003d/fff?text=${name}">
+            <div class="card-info"><h3>${name}</h3></div>
+        `;
+
+        card.onclick = () => openSpotify(name);
+        results.appendChild(card);
+    });
 }
-</style>
-</head>
 
-<body>
+/* =====================
+   FAVORITE TOGGLE
+===================== */
+function toggleFavorite(name) {
+    if (favorites.includes(name)) {
+        favorites = favorites.filter(a => a !== name);
+    } else {
+        favorites.push(name);
+    }
+    saveFavorites();
+    renderFavoritesBadge();
+}
 
-<div class="header">
-    <h1>🎵 VibeSearch</h1>
-</div>
+/* =====================
+   SEARCH
+===================== */
+function search() {
+    const input = document.getElementById("artist").value;
+    const results = document.getElementById("results");
 
-<div class="search-section">
-    <input id="artist" placeholder="Search artists...">
-    <button class="search-btn" onclick="search()">Search</button>
-    <button class="fav-btn-top" onclick="openFavoritesPage()">❤️</button>
-</div>
+    if (!input) return;
 
-<div id="results"></div>
+    results.innerHTML = "Loading...";
 
-<!-- MODAL -->
-<div id="artist-modal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        <h2 id="modal-name"></h2>
-        <p id="modal-bio"></p>
-    </div>
-</div>
+    fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(input)}&api_key=${API_KEY}&format=json`)
+        .then(r => r.json())
+        .then(data => {
 
-<script src="app.js"></script>
-</body>
-</html>
+            const artists = data.similarartists?.artist || [];
+            results.innerHTML = "";
+
+            artists.slice(0, 12).forEach(a => {
+
+                const card = document.createElement("div");
+                card.className = "artist-card";
+
+                card.innerHTML = `
+                    <img src="${getArtistImage(a)}">
+                    <div class="card-info">
+                        <h3>${a.name}</h3>
+                        <p>${Math.round(a.match * 100)}%</p>
+                    </div>
+                    <div class="card-actions">
+                        <button class="spotify-btn">Spotify</button>
+                        <button class="fav-btn">
+                            ${favorites.includes(a.name) ? "❤️" : "🤍"}
+                        </button>
+                    </div>
+                `;
+
+                card.onclick = () => {
+                    fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(a.name)}&api_key=${API_KEY}&format=json`)
+                        .then(r => r.json())
+                        .then(info => {
+                            const bio =
+                                info.artist?.bio?.summary?.replace(/<[^>]+>/g, '') ||
+                                "No bio available";
+
+                            openModal(a.name, bio);
+                        });
+                };
+
+                card.querySelector(".spotify-btn").onclick = (e) => {
+                    e.stopPropagation();
+                    openSpotify(a.name);
+                };
+
+                card.querySelector(".fav-btn").onclick = (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(a.name);
+                    search();
+                };
+
+                results.appendChild(card);
+            });
+        });
+}
+
+/* =====================
+   INIT
+===================== */
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("artist").addEventListener("keypress", e => {
+        if (e.key === "Enter") search();
+    });
+
+    document.querySelector(".close-btn").onclick = () => {
+        document.getElementById("artist-modal").style.display = "none";
+    };
+
+    window.onclick = (e) => {
+        if (e.target.id === "artist-modal") {
+            document.getElementById("artist-modal").style.display = "none";
+        }
+    };
+
+    renderFavoritesBadge();
+});
