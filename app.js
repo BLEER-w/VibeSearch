@@ -40,6 +40,22 @@ async function getSpotifyArtistImage(name) {
 function saveFavorites() {
     localStorage.setItem("favorites", JSON.stringify(favorites));
 }
+async function getTopTrack(artistName) {
+    try {
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(artistName)}&entity=song&limit=1`);
+        const data = await res.json();
+
+        const track = data.results?.[0];
+        if (!track) return null;
+
+        return {
+            name: track.trackName,
+            preview: track.previewUrl
+        };
+    } catch {
+        return null;
+    }
+}
 
 function getArtistImage(a) {
     const img =
