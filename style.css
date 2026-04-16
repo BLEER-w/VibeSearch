@@ -130,6 +130,19 @@ button {
     background: #1DB954;
     flex: 1;
 }
+.video-btn {
+    background: #ffcc00;
+    color: black;
+    margin-top: 8px;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.video-container {
+    margin-top: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+}
 
 .fav-btn {
     background: #ff4081;
