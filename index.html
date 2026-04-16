@@ -1,228 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VibeSearch</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VibeSearch</title>
 
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
 
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #0a0014 0%, #1a003d 50%, #0a0014 100%);
-            min-height: 100vh;
-            color: white;
-            padding: 20px;
-        }
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #0a0014;
+    color: white;
+}
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+/* HEADER */
+.header {
+    padding: 20px;
+    text-align: center;
+}
 
-        h1 {
-            text-align: center;
-            font-size: 3em;
-            margin-bottom: 20px;
-            color: #00d4ff;
-        }
+.header h1 {
+    font-size: 2.5em;
+    color: #00d4ff;
+}
 
-        .search-box {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 40px;
-        }
+.fav-count {
+    font-size: 0.6em;
+    color: #ff4081;
+}
 
-        input {
-            width: 300px;
-            padding: 12px;
-            border: 2px solid #7c3aed;
-            border-radius: 25px;
-            background: rgba(20, 20, 40, 0.8);
-            color: white;
-            font-size: 1em;
-        }
+/* SEARCH */
+.search-section {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    position: relative;
+}
 
-        button {
-            padding: 12px 30px;
-            background: #7c3aed;
-            color: white;
-            border: none;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+#artist {
+    width: 300px;
+    padding: 12px;
+    border-radius: 25px;
+    border: none;
+    background: #1a003d;
+    color: white;
+}
 
-        button:hover { background: #00d4ff; }
+button {
+    padding: 12px 20px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+}
 
-        #results {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
+.search-btn {
+    background: #7c3aed;
+    color: white;
+}
 
-        .artist-card {
-            background: rgba(40, 20, 80, 0.8);
-            border: 2px solid #7c3aed;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+.fav-btn-top {
+    background: #ff4081;
+    color: white;
+}
 
-        .artist-card:hover {
-            border-color: #00d4ff;
-            transform: scale(1.05);
-        }
+/* RESULTS GRID */
+#results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
 
-        .artist-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
+/* CARD */
+.artist-card {
+    background: #1a003d;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: 0.3s;
+    position: relative;
+}
 
-        .artist-card h3 {
-            color: #00d4ff;
-            margin-bottom: 5px;
-        }
+.artist-card:hover {
+    transform: translateY(-5px);
+}
 
-        .artist-description {
-            font-size: 0.8em;
-            color: #ccc;
-            margin-top: 5px;
-        }
+.card-img-wrapper {
+    position: relative;
+}
 
-        /* MODAL */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 0, 20, 0.8);
-            backdrop-filter: blur(8px);
-        }
+.card-img-wrapper img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
 
-        .modal-content {
-            background: rgba(30, 20, 60, 0.95);
-            margin: 10% auto;
-            padding: 25px;
-            border-radius: 15px;
-            width: 90%;
-            max-width: 500px;
-        }
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    transition:0.3s;
+    font-size: 2em;
+}
 
-        .close-btn {
-            float: right;
-            font-size: 24px;
-            cursor: pointer;
-        }
+.artist-card:hover .overlay {
+    opacity:1;
+}
 
-        .message {
-            text-align: center;
-            color: #b0b0ff;
-            padding: 20px;
-        }
-    </style>
+/* INFO */
+.card-info {
+    padding: 10px;
+}
+
+.card-info h3 {
+    color: #00d4ff;
+}
+
+.card-actions {
+    display:flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.spotify-btn {
+    background:#1DB954;
+    color:white;
+}
+
+/* AUTOCOMPLETE */
+#autocomplete-box {
+    position:absolute;
+    top:60px;
+    background:#1a003d;
+    width:300px;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.auto-item {
+    padding:10px;
+    cursor:pointer;
+}
+
+.auto-item:hover {
+    background:#7c3aed;
+}
+
+/* MODAL */
+.modal {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.8);
+}
+
+.modal-content {
+    background:#1a003d;
+    margin:10% auto;
+    padding:20px;
+    width:90%;
+    max-width:500px;
+    border-radius:10px;
+}
+
+.close-btn {
+    float:right;
+    cursor:pointer;
+}
+
+/* ANIMATION */
+.animate {
+    animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+    from {opacity:0; transform:translateY(10px);}
+    to {opacity:1; transform:translateY(0);}
+}
+</style>
 </head>
 
 <body>
-    <div class="container">
-        <h1>🎵 VibeSearch</h1>
 
-        <div class="search-box">
-            <input type="text" id="artist" placeholder="Enter artist name...">
-            <button onclick="search()">Search</button>
-        </div>
+<div class="header">
+    <h1>🎵 VibeSearch <span id="fav-count" class="fav-count">0</span></h1>
+</div>
 
-        <div id="results"></div>
+<div class="search-section">
+    <input id="artist" placeholder="Search artists...">
+    <button class="search-btn" onclick="search()">Search</button>
+    <button class="fav-btn-top" onclick="openFavoritesPage()">❤️</button>
+</div>
+
+<div id="results"></div>
+
+<!-- MODAL -->
+<div id="artist-modal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <h2 id="modal-name"></h2>
+        <p id="modal-bio"></p>
     </div>
+</div>
 
-    <!-- MODAL -->
-    <div id="artist-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2 id="modal-name"></h2>
-            <p id="modal-bio"></p>
-        </div>
-    </div>
+<!-- LINK YOUR JS FILE -->
+<script src="app.js"></script>
 
-    <script>
-        const API_KEY = '3bd4b23b8db71c70de8380ebc7f4bccb';
-
-        function openModal(name, bio) {
-            document.getElementById('modal-name').textContent = name;
-            document.getElementById('modal-bio').textContent = bio;
-            document.getElementById('artist-modal').style.display = 'block';
-        }
-
-        function search() {
-            const artist = document.getElementById('artist').value;
-            if (!artist) return alert('Enter an artist name');
-
-            document.getElementById('results').innerHTML = '<div class="message">Loading...</div>';
-
-            fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(artist)}&api_key=${API_KEY}&format=json`)
-                .then(r => r.json())
-                .then(data => {
-                    if (data.error) {
-                        document.getElementById('results').innerHTML = '<div class="message">Artist not found</div>';
-                        return;
-                    }
-
-                    const artists = data.similarartists.artist || [];
-                    document.getElementById('results').innerHTML = '';
-
-                    artists.slice(0, 12).forEach(a => {
-                        const img = a.image?.[2]?.['#text'] || '';
-
-                        fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist=${encodeURIComponent(a.name)}&api_key=${API_KEY}&format=json`)
-                            .then(res => res.json())
-                            .then(info => {
-
-                                let bio = "No description available";
-
-                                if (info.artist?.bio?.summary) {
-                                    bio = info.artist.bio.summary
-                                        .replace(/<[^>]+>/g, '')
-                                        .slice(0, 120) + '...';
-                                }
-
-                                const card = `
-                                    <div class="artist-card"
-                                        onclick="openModal('${a.name.replace(/'/g,"\\'")}', \`${bio.replace(/`/g,"")}\`)">
-
-                                        <img src="${img}">
-                                        <h3>${a.name}</h3>
-                                        <p>${Math.round(a.match * 100)}% match</p>
-                                    </div>
-                                `;
-
-                                document.getElementById('results').innerHTML += card;
-                            });
-                    });
-                });
-        }
-
-        document.getElementById('artist').addEventListener('keypress', e => {
-            if (e.key === 'Enter') search();
-        });
-
-        document.querySelector('.close-btn').onclick = () => {
-            document.getElementById('artist-modal').style.display = 'none';
-        };
-
-        window.onclick = (e) => {
-            const modal = document.getElementById('artist-modal');
-            if (e.target === modal) modal.style.display = 'none';
-        };
-    </script>
 </body>
 </html>
