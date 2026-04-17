@@ -165,11 +165,44 @@ async function renderArtists() {
         };
 
         /* FAVORITES */
+        function openFavoritesPage() {
+    const results = document.getElementById("results");
+    results.innerHTML = "";
+
+    if (favorites.length === 0) {
+        results.innerHTML = "<p style='text-align:center;'>No favorites yet ❤️</p>";
+        return;
+    }
+
+    favorites.forEach(a => {
+        const card = document.createElement("div");
+        card.className = "artist-card";
+
+        card.innerHTML = `
+            <div class="card-info">
+                <h3>${a.name}</h3>
+            </div>
+
+            <div class="card-actions">
+                <button class="spotify-btn">Spotify</button>
+                <button class="fav-btn">Remove ❤️</button>
+            </div>
+        `;
+
+        card.querySelector(".spotify-btn").onclick = (e) => {
+            e.stopPropagation();
+            openSpotify(a.name);
+        };
+
         card.querySelector(".fav-btn").onclick = (e) => {
             e.stopPropagation();
             toggleFavorite(a.name);
-            search();
+            openFavoritesPage(); // refresh list
         };
+
+        results.appendChild(card);
+    });
+}
 
         /* AUDIO */
         if (track?.preview) {
