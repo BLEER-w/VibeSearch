@@ -179,7 +179,9 @@ async function search() {
 
     results.innerHTML = "";
     renderArtists();
-        async function renderArtists() {
+        
+}
+async function renderArtists() {
     const results = document.getElementById("results");
 
     results.innerHTML = "";
@@ -215,8 +217,6 @@ async function search() {
     }
 
     renderShowMoreButton();
-}
-
         const track = await getTopTrack(a.name);
 
         const card = document.createElement("div");
