@@ -5,6 +5,7 @@ const SPOTIFY_CLIENT_SECRET = "0d05c8793cb846e3a8a17519269458dd";
 const YOUTUBE_API_KEY = "AIzaSyAZ2twXaUCGHKvSGVVhEdy57dbUGVIswsY";
 
 let spotifyToken = null;
+console.log("APP JS LOADED");
 let currentAudio = null;
 
 let allArtists = [];
