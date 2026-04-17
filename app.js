@@ -67,18 +67,44 @@ function openSpotify(name) {
 }
 
 /* ================= FAVORITES ================= */
-function toggleFavorite(name) {
-    const exists = favorites.find(f => f.name === name);
+function openFavoritesPage() {
+    const results = document.getElementById("results");
+    results.innerHTML = "";
 
-    if (exists) {
-        favorites = favorites.filter(f => f.name !== name);
-    } else {
-        favorites.push({ name });
+    if (favorites.length === 0) {
+        results.innerHTML = "<p style='text-align:center;'>No favorites yet ❤️</p>";
+        return;
     }
 
-    saveFavorites();
-}
+    favorites.forEach(a => {
+        const card = document.createElement("div");
+        card.className = "artist-card";
 
+        card.innerHTML = `
+            <div class="card-info">
+                <h3>${a.name}</h3>
+            </div>
+
+            <div class="card-actions">
+                <button class="spotify-btn">Spotify</button>
+                <button class="fav-btn">Remove ❤️</button>
+            </div>
+        `;
+
+        card.querySelector(".spotify-btn").onclick = (e) => {
+            e.stopPropagation();
+            openSpotify(a.name);
+        };
+
+        card.querySelector(".fav-btn").onclick = (e) => {
+            e.stopPropagation();
+            toggleFavorite(a.name);
+            openFavoritesPage(); // refresh
+        };
+
+        results.appendChild(card);
+    });
+}
 /* ================= SEARCH ================= */
 async function search() {
     const input = document.getElementById("artist").value;
