@@ -183,11 +183,11 @@ async function search() {
 }
 async function renderArtists() {
     const results = document.getElementById("results");
-
     results.innerHTML = "";
 
     for (const a of allArtists.slice(0, visibleCount)) {
 
+        // ✅ a is valid ONLY here
         const track = await getTopTrack(a.name);
 
         const card = document.createElement("div");
@@ -196,26 +196,12 @@ async function renderArtists() {
         card.innerHTML = `
             <div class="card-info">
                 <h3>${a.name}</h3>
-
-                ${track ? `
-                    <p class="track-name">${track.name}</p>
-                    <button class="video-btn">Watch Video</button>
-                    <div class="video-container" style="display:none;"></div>
-                ` : ""}
-            </div>
-
-            <div class="card-actions">
-                <button class="spotify-btn">Spotify</button>
-                <button class="fav-btn">${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}</button>
-                ${track?.preview ? `<button class="play-btn">▶️</button>` : ""}
             </div>
         `;
 
-        // (keep ALL your existing event listeners here exactly the same)
-
         results.appendChild(card);
     }
-
+}
     renderShowMoreButton();
         for (const a of allArtists.slice(0, visibleCount)) {
     const track = await getTopTrack(a.name); // ✅ correct
