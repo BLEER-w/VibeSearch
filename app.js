@@ -6,8 +6,10 @@ const YOUTUBE_API_KEY = "AIzaSyAZ2twXaUCGHKvSGVVhEdy57dbUGVIswsY";
 
 let spotifyToken = null;
 let currentAudio = null;
+
 let allArtists = [];
 let visibleCount = 12;
+
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
 /* ================= SPOTIFY ================= */
@@ -47,17 +49,6 @@ async function getTopTrack(artistName) {
     }
 }
 
-function getArtistImage(a) {
-    const img =
-        a.image?.[3]?.['#text'] ||
-        a.image?.[2]?.['#text'] ||
-        a.image?.[1]?.['#text'];
-
-    if (img && img.trim()) return img;
-
-    return null;
-}
-
 /* ================= YOUTUBE ================= */
 async function getYouTubeVideoId(artist, song) {
     const query = encodeURIComponent(`${artist} ${song} official music video`);
@@ -87,80 +78,6 @@ function toggleFavorite(name) {
 
     saveFavorites();
 }
-function renderShowMoreButton() {
-    const results = document.getElementById("results");
-
-    // remove old button if exists
-    const oldBtn = document.getElementById("show-more");
-    if (oldBtn) oldBtn.remove();
-
-    if (visibleCount >= allArtists.length) return;
-
-    const btn = document.createElement("button");
-    btn.id = "show-more";
-    btn.textContent = "Show More";
-    btn.className = "search-btn";
-    btn.style.gridColumn = "1 / -1"; // full width
-
-    btn.onclick = () => {
-        visibleCount += 12;
-        renderArtists();
-    };
-
-    results.appendChild(btn);
-}
-
-function openFavoritesPage() {
-    const results = document.getElementById("results");
-    results.innerHTML = "";
-
-    favorites.forEach(a => {
-        const card = document.createElement("div");
-        card.className = "artist-card";
-
-        card.innerHTML = `<div class="card-info"><h3>${a.name}</h3></div>`;
-        card.onclick = () => openSpotify(a.name);
-
-        results.appendChild(card);
-    });
-}
-function openAbout() {
-    let modal = document.getElementById("about-modal");
-
-    if (!modal) {
-        modal = document.createElement("div");
-        modal.id = "about-modal";
-        modal.className = "about-modal";
-
-        modal.innerHTML = `
-            <div class="about-content">
-                <h2>🎵 About VibeSearch</h2>
-                <p>
-                    VibeSearch lets you discover artists similar to your favorites.
-                </p>
-
-                <p>
-                    🔎 Search any artist<br>
-                    🎧 Listen to song previews<br>
-                    🎬 Watch music videos<br>
-                    ❤️ Save favorites<br>
-                    🎵 Open Spotify pages
-                </p>
-
-                <button onclick="closeAbout()" class="search-btn">Close</button>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-    }
-
-    modal.style.display = "block";
-}
-
-function closeAbout() {
-    const modal = document.getElementById("about-modal");
-    if (modal) modal.style.display = "none";
-}
 
 /* ================= SEARCH ================= */
 async function search() {
@@ -171,41 +88,26 @@ async function search() {
 
     results.innerHTML = "Loading...";
 
-    const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(input)}&api_key=${API_KEY}&format=json`);
+    const res = await fetch(
+        `https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(input)}&api_key=${API_KEY}&format=json`
+    );
+
     const data = await res.json();
 
     allArtists = data.similarartists?.artist || [];
     visibleCount = 12;
 
-    results.innerHTML = "";
-    renderArtists();
-        
+    await renderArtists();
 }
+
+/* ================= RENDER ================= */
 async function renderArtists() {
     const results = document.getElementById("results");
     results.innerHTML = "";
 
     for (const a of allArtists.slice(0, visibleCount)) {
 
-        // ✅ a is valid ONLY here
         const track = await getTopTrack(a.name);
-
-        const card = document.createElement("div");
-        card.className = "artist-card";
-
-        card.innerHTML = `
-            <div class="card-info">
-                <h3>${a.name}</h3>
-            </div>
-        `;
-
-        results.appendChild(card);
-    }
-}
-    renderShowMoreButton();
-        for (const a of allArtists.slice(0, visibleCount)) {
-    const track = await getTopTrack(a.name); // ✅ correct
-}
 
         const card = document.createElement("div");
         card.className = "artist-card";
@@ -256,12 +158,13 @@ async function renderArtists() {
             };
         }
 
-        /* BUTTONS */
+        /* SPOTIFY */
         card.querySelector(".spotify-btn").onclick = (e) => {
             e.stopPropagation();
             openSpotify(a.name);
         };
 
+        /* FAVORITES */
         card.querySelector(".fav-btn").onclick = (e) => {
             e.stopPropagation();
             toggleFavorite(a.name);
@@ -296,8 +199,33 @@ async function renderArtists() {
         results.appendChild(card);
     }
 
+    renderShowMoreButton();
+}
 
-/* INIT */
+/* ================= SHOW MORE ================= */
+function renderShowMoreButton() {
+    const results = document.getElementById("results");
+
+    const oldBtn = document.getElementById("show-more");
+    if (oldBtn) oldBtn.remove();
+
+    if (visibleCount >= allArtists.length) return;
+
+    const btn = document.createElement("button");
+    btn.id = "show-more";
+    btn.textContent = "Show More";
+    btn.className = "search-btn";
+    btn.style.gridColumn = "1 / -1";
+
+    btn.onclick = () => {
+        visibleCount += 12;
+        renderArtists();
+    };
+
+    results.appendChild(btn);
+}
+
+/* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("artist").addEventListener("keypress", e => {
         if (e.key === "Enter") search();
