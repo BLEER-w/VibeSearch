@@ -203,6 +203,38 @@ async function renderArtists() {
         results.appendChild(card);
     });
 }
+        /*ABOUT*/
+        function openAbout() {
+    let modal = document.getElementById("about-modal");
+
+    if (!modal) {
+        modal = document.createElement("div");
+        modal.id = "about-modal";
+        modal.className = "about-modal";
+
+        modal.innerHTML = `
+            <div class="about-content">
+                <h2>🎵 About VibeSearch</h2>
+                <p>
+                    Discover similar artists, listen to previews, watch videos, and save favorites.
+                </p>
+
+                <button class="search-btn" id="close-about">Close</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        document.getElementById("close-about").onclick = closeAbout;
+    }
+
+    modal.style.display = "block";
+}
+
+function closeAbout() {
+    const modal = document.getElementById("about-modal");
+    if (modal) modal.style.display = "none";
+}
 
         /* AUDIO */
         if (track?.preview) {
