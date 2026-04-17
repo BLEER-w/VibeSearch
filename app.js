@@ -218,14 +218,19 @@ async function renderArtists() {
                 <p>
                     Discover similar artists, listen to previews, watch videos, and save favorites.
                 </p>
-
                 <button class="search-btn" id="close-about">Close</button>
             </div>
         `;
 
         document.body.appendChild(modal);
 
+        // close button
         document.getElementById("close-about").onclick = closeAbout;
+
+        // click outside to close
+        modal.onclick = (e) => {
+            if (e.target === modal) closeAbout();
+        };
     }
 
     modal.style.display = "block";
