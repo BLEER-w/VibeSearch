@@ -6,6 +6,8 @@ const YOUTUBE_API_KEY = "AIzaSyAZ2twXaUCGHKvSGVVhEdy57dbUGVIswsY";
 
 let spotifyToken = null;
 let currentAudio = null;
+let allArtists = [];
+let visibleCount = 12;
 let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
 
 /* ================= SPOTIFY ================= */
@@ -85,6 +87,28 @@ function toggleFavorite(name) {
 
     saveFavorites();
 }
+function renderShowMoreButton() {
+    const results = document.getElementById("results");
+
+    // remove old button if exists
+    const oldBtn = document.getElementById("show-more");
+    if (oldBtn) oldBtn.remove();
+
+    if (visibleCount >= allArtists.length) return;
+
+    const btn = document.createElement("button");
+    btn.id = "show-more";
+    btn.textContent = "Show More";
+    btn.className = "search-btn";
+    btn.style.gridColumn = "1 / -1"; // full width
+
+    btn.onclick = () => {
+        visibleCount += 12;
+        renderArtists();
+    };
+
+    results.appendChild(btn);
+}
 
 function openFavoritesPage() {
     const results = document.getElementById("results");
@@ -150,10 +174,48 @@ async function search() {
     const res = await fetch(`https://ws.audioscrobbler.com/2.0/?method=artist.getsimilar&artist=${encodeURIComponent(input)}&api_key=${API_KEY}&format=json`);
     const data = await res.json();
 
-    const artists = data.similarartists?.artist || [];
+    allArtists = data.similarartists?.artist || [];
+    visibleCount = 12;
+
+    results.innerHTML = "";
+    renderArtists();
+        async function renderArtists() {
+    const results = document.getElementById("results");
+
     results.innerHTML = "";
 
-    for (const a of artists.slice(0, 12)) {
+    for (const a of allArtists.slice(0, visibleCount)) {
+
+        const track = await getTopTrack(a.name);
+
+        const card = document.createElement("div");
+        card.className = "artist-card";
+
+        card.innerHTML = `
+            <div class="card-info">
+                <h3>${a.name}</h3>
+
+                ${track ? `
+                    <p class="track-name">${track.name}</p>
+                    <button class="video-btn">Watch Video</button>
+                    <div class="video-container" style="display:none;"></div>
+                ` : ""}
+            </div>
+
+            <div class="card-actions">
+                <button class="spotify-btn">Spotify</button>
+                <button class="fav-btn">${favorites.some(f => f.name === a.name) ? "❤️" : "🤍"}</button>
+                ${track?.preview ? `<button class="play-btn">▶️</button>` : ""}
+            </div>
+        `;
+
+        // (keep ALL your existing event listeners here exactly the same)
+
+        results.appendChild(card);
+    }
+
+    renderShowMoreButton();
+}
 
         const track = await getTopTrack(a.name);
 
