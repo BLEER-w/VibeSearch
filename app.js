@@ -307,7 +307,7 @@ async function search() {
 
         results.appendChild(card);
     }
-}
+
 
 /* INIT */
 document.addEventListener("DOMContentLoaded", () => {
